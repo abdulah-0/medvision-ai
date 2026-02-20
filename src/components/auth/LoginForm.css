@@ -1,0 +1,167 @@
+/* ===== Auth Form — MedVision Secure Login Card ===== */
+.auth-form {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: var(--spacing-2xl);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(99, 36, 235, 0.06);
+    border: 1px solid var(--color-border);
+}
+
+/* Logo at top of card */
+.auth-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+}
+
+.auth-logo-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, #6324eb, #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 6px 16px rgba(99, 36, 235, 0.35);
+}
+
+.auth-logo-text {
+    font-size: var(--font-size-xl);
+    font-weight: 800;
+    background: linear-gradient(135deg, #6324eb, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+}
+
+.auth-form h2 {
+    text-align: center;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-2xl);
+    letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    letter-spacing: 0.01em;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.7rem var(--spacing-md);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    background: var(--color-surface-2);
+    color: var(--color-text);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 36, 235, 0.1);
+    background: var(--color-surface);
+}
+
+.error-message {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--color-warning-bg);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: var(--radius-lg);
+    color: var(--color-warning);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    margin-bottom: var(--spacing-md);
+}
+
+.success-message {
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.success-message h2 {
+    color: var(--color-success);
+    margin-bottom: var(--spacing-md);
+}
+
+.success-message p {
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* Primary submit button */
+.auth-submit-btn {
+    width: 100%;
+    margin-top: var(--spacing-md);
+    padding: 0.8rem var(--spacing-lg);
+    background: linear-gradient(135deg, #6324eb, #7c3aed);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 16px rgba(99, 36, 235, 0.3);
+    letter-spacing: 0.01em;
+}
+
+.auth-submit-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    box-shadow: 0 6px 20px rgba(99, 36, 235, 0.45);
+    transform: translateY(-1px);
+}
+
+.auth-submit-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auth-toggle {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.auth-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-weight: 700;
+    font-family: var(--font-family);
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+}
+
+.auth-toggle-btn:hover {
+    text-decoration: underline;
+}

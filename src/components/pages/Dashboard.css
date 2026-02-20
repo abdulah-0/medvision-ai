@@ -1,0 +1,16 @@
+.dashboard {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.dashboard-main {
+    flex: 1;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        flex-direction: column;
+    }
+}
