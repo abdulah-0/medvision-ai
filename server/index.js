@@ -9,24 +9,13 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// Build allowed origins — strip trailing slashes to avoid mismatch
-const rawOrigin = process.env.FRONTEND_URL || ''
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    ...rawOrigin.split(',').map(o => o.trim().replace(/\/$/, '')).filter(Boolean)
-]
-
-// Middleware
+// Allow all origins — safe because API keys are server-side only
+// Vercel generates unique preview URLs that can't be statically whitelisted
 app.use(cors({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (curl, mobile apps, health checks)
-        if (!origin) return callback(null, true)
-        if (allowedOrigins.includes(origin)) return callback(null, true)
-        callback(new Error(`CORS blocked: ${origin}`))
-    },
+    origin: true,
     credentials: true
 }))
+
 app.use(express.json())
 
 // Routes
