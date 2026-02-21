@@ -2,6 +2,9 @@ import { supabase } from './supabaseClient'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'
 
+// Log the server URL on init so it's visible in the console if debugging
+console.log('[MedVision] Backend URL:', SERVER_URL)
+
 /**
  * Send a message to the AI via the Express backend
  */
@@ -14,7 +17,7 @@ export async function sendChatMessage(message, history = [], userProfile = null)
 
     if (!response.ok) {
         const err = await response.json().catch(() => ({}))
-        throw new Error(err.error || 'Failed to get AI response')
+        throw new Error(err.error || `Failed to get AI response (${response.status} from ${SERVER_URL}/api/chat)`)
     }
 
     return response.json()

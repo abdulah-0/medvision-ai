@@ -82,7 +82,7 @@ export function useChat(chatId, userProfile = null) {
         } finally {
             setLoading(false)
         }
-    }, [chatId])
+    }, [chatId, userProfile])
 
     return {
         messages,
