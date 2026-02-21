@@ -12,7 +12,7 @@ function detectImageRequest(message) {
 /**
  * Custom hook for managing chat functionality
  */
-export function useChat(chatId) {
+export function useChat(chatId, userProfile = null) {
     const [messages, setMessages] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -62,7 +62,7 @@ export function useChat(chatId) {
                 aiContent = imgResult.description || 'Here is the medical diagram you requested.'
             } else {
                 // Text chat path
-                const result = await sendChatMessage(content, history)
+                const result = await sendChatMessage(content, history, userProfile)
                 aiContent = result.message
             }
 

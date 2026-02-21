@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { fetchChatHistory, createNewChat, deleteChat } from '../../services/api'
 import './Sidebar.css'
 
-export function Sidebar({ currentChatId, onSelectChat, onNewChat }) {
+export function Sidebar({ currentChatId, onSelectChat, onNewChat, onShowProfile, userProfile }) {
     const { user, signOut } = useAuth()
     const [chats, setChats] = useState([])
     const [loading, setLoading] = useState(false)
@@ -51,7 +51,10 @@ export function Sidebar({ currentChatId, onSelectChat, onNewChat }) {
     }
 
     // Get initials for avatar
-    const avatarLetter = user?.email?.charAt(0).toUpperCase() || '?'
+    const avatarLetter = userProfile?.full_name
+        ? userProfile.full_name[0].toUpperCase()
+        : user?.email?.charAt(0).toUpperCase() || '?'
+    const displayName = userProfile?.full_name || user?.email
 
     return (
         <div className="sidebar">
@@ -107,8 +110,11 @@ export function Sidebar({ currentChatId, onSelectChat, onNewChat }) {
             <div className="sidebar-footer">
                 <div className="user-info">
                     <div className="user-avatar">{avatarLetter}</div>
-                    <span className="user-email">{user?.email}</span>
+                    <span className="user-email">{displayName}</span>
                 </div>
+                <button className="profile-link-btn" onClick={onShowProfile}>
+                    👤 My Profile
+                </button>
                 <button className="signout-btn" onClick={signOut}>
                     Sign Out
                 </button>

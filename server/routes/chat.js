@@ -4,9 +4,27 @@ import { checkEmergency, checkRestrictedQuery } from '../safety.js'
 
 export const chatRouter = Router()
 
+// Build a patient context block from the user's profile
+function buildPatientContext(profile) {
+    if (!profile || !profile.onboarding_complete) return ''
+
+    const lines = []
+    if (profile.full_name) lines.push(`- Name: ${profile.full_name}`)
+    if (profile.age) lines.push(`- Age: ${profile.age}`)
+    if (profile.gender) lines.push(`- Gender: ${profile.gender}`)
+    if (profile.blood_type) lines.push(`- Blood Type: ${profile.blood_type}`)
+    if (profile.conditions?.length) lines.push(`- Medical Conditions: ${profile.conditions.join(', ')}`)
+    if (profile.medications?.length) lines.push(`- Current Medications: ${profile.medications.join(', ')}`)
+    if (profile.allergies?.length) lines.push(`- Allergies: ${profile.allergies.join(', ')}`)
+    if (profile.notes) lines.push(`- Additional Notes: ${profile.notes}`)
+
+    if (!lines.length) return ''
+    return `\n\nCURRENT PATIENT PROFILE:\n${lines.join('\n')}\n\nAlways tailor your responses considering this patient's specific conditions, medications, and allergies. Flag any potential interactions or special considerations relevant to their profile.`
+}
+
 chatRouter.post('/', async (req, res) => {
     try {
-        const { message, history = [] } = req.body
+        const { message, history = [], userProfile } = req.body
 
         if (!message || typeof message !== 'string') {
             return res.status(400).json({ error: 'Message is required' })
@@ -31,6 +49,8 @@ chatRouter.post('/', async (req, res) => {
         }
 
         // 3. Build message history for context
+        const patientContext = buildPatientContext(userProfile)
+
         const messages = [
             {
                 role: 'system',
@@ -42,14 +62,14 @@ IMPORTANT RULES:
 - Never prescribe medications or specific dosages
 - For emergencies, always direct users to seek immediate medical attention
 - Keep responses clear, accurate, and educational
-- Focus on symptom explanations, disease overviews, preventive measures, and general treatment information`
+- Focus on symptom explanations, disease overviews, preventive measures, and general treatment information
+- When a patient profile is provided, personalize your responses to their specific health context${patientContext}`
             },
-            ...history.slice(-10), // Keep last 10 messages for context
+            ...history.slice(-10),
             { role: 'user', content: trimmed }
         ]
 
         const response = await callOpenRouter(messages, 'text')
-
         res.json({ message: response })
     } catch (error) {
         console.error('Chat error:', error)

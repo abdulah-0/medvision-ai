@@ -268,6 +268,27 @@
     white-space: nowrap;
 }
 
+.profile-link-btn {
+    width: 100%;
+    padding: 0.5rem var(--spacing-md);
+    background: rgba(168, 85, 247, 0.12);
+    color: rgba(216, 180, 254, 0.9);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-bottom: 0.4rem;
+    text-align: left;
+}
+
+.profile-link-btn:hover {
+    background: rgba(168, 85, 247, 0.22);
+    color: #fff;
+}
+
 .signout-btn {
     width: 100%;
     padding: 0.5rem var(--spacing-md);
@@ -287,6 +308,7 @@
     background: rgba(255, 255, 255, 0.12);
     color: #fff;
 }
+
 
 /* Mobile */
 @media (max-width: 768px) {

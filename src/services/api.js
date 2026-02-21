@@ -5,11 +5,11 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'
 /**
  * Send a message to the AI via the Express backend
  */
-export async function sendChatMessage(message, history = []) {
+export async function sendChatMessage(message, history = [], userProfile = null) {
     const response = await fetch(`${SERVER_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, history })
+        body: JSON.stringify({ message, history, userProfile })
     })
 
     if (!response.ok) {
@@ -19,6 +19,51 @@ export async function sendChatMessage(message, history = []) {
 
     return response.json()
 }
+
+/**
+ * Get the current user's medical profile
+ */
+export async function getUserProfile(userId) {
+    const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+
+    if (error && error.code === 'PGRST116') return null // no profile yet
+    if (error) throw error
+    return data
+}
+
+/**
+ * Create a new user profile (first-time onboarding)
+ */
+export async function saveUserProfile(userId, profileData) {
+    const { data, error } = await supabase
+        .from('user_profiles')
+        .insert([{ user_id: userId, ...profileData, onboarding_complete: true }])
+        .select()
+        .single()
+
+    if (error) throw error
+    return data
+}
+
+/**
+ * Update an existing user profile
+ */
+export async function updateUserProfile(userId, profileData) {
+    const { data, error } = await supabase
+        .from('user_profiles')
+        .update({ ...profileData, updated_at: new Date().toISOString() })
+        .eq('user_id', userId)
+        .select()
+        .single()
+
+    if (error) throw error
+    return data
+}
+
 
 /**
  * Generate a medical image via the Express backend

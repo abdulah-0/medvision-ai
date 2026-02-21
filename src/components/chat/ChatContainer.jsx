@@ -6,8 +6,8 @@ import { ChatInput } from './ChatInput'
 import { DisclaimerBanner } from '../common/DisclaimerBanner'
 import './ChatContainer.css'
 
-export function ChatContainer({ chatId }) {
-    const { messages, setMessages, loading, error, sendMessage } = useChat(chatId)
+export function ChatContainer({ chatId, userProfile }) {
+    const { messages, setMessages, loading, error, sendMessage } = useChat(chatId, userProfile)
 
     // Load messages when chat changes
     useEffect(() => {
@@ -27,7 +27,7 @@ export function ChatContainer({ chatId }) {
                     <div className="chat-header-icon">⚕️</div>
                     <div className="chat-header-text">
                         <h2>MedVision AI</h2>
-                        <p>Clinical AI Assistant</p>
+                        <p>Clinical AI Assistant{userProfile?.full_name ? ` • ${userProfile.full_name}` : ''}</p>
                     </div>
                 </div>
                 <div className="chat-header-badge">AI Online</div>
