@@ -23,7 +23,6 @@ export function Dashboard() {
                 .then(profile => setUserProfile(profile))
                 .catch(err => {
                     console.error('Failed to load profile:', err)
-                    // Detect missing table (Supabase returns 404 when table doesn't exist)
                     const msg = err?.message || ''
                     if (err?.code === '42P01' || msg.includes('does not exist') || msg.includes('404') || err?.status === 404) {
                         setProfileError('setup_required')
@@ -34,6 +33,16 @@ export function Dashboard() {
                 .finally(() => setProfileLoading(false))
         }
     }, [user])
+
+    // Keep the Render backend warm while user is on the dashboard (ping every 5 min)
+    useEffect(() => {
+        const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'
+        const ping = () => fetch(`${serverUrl}/api/health`).catch(() => { })
+        ping() // immediate ping when dashboard mounts
+        const interval = setInterval(ping, 5 * 60 * 1000)
+        return () => clearInterval(interval)
+    }, [])
+
 
     // Create initial chat after profile loaded
     useEffect(() => {

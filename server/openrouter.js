@@ -1,13 +1,13 @@
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
-// Free models available on OpenRouter (verified 2026-02, in priority order)
+// Free models — ordered by speed (fastest first)
+// Large free models (70B+) have long queue times on OpenRouter free tier
 const FREE_TEXT_MODELS = [
-    'openai/gpt-oss-120b:free',                      // primary model
-    'meta-llama/llama-3.3-70b-instruct:free',
-    'deepseek/deepseek-r1-0528:free',
-    'mistralai/mistral-small-3.1-24b-instruct:free',
-    'google/gemma-3-27b-it:free',
-    'meta-llama/llama-3.2-3b-instruct:free',
+    'meta-llama/llama-3.2-3b-instruct:free',          // 3B — near-instant
+    'mistralai/mistral-small-3.1-24b-instruct:free',  // 24B — fast
+    'google/gemma-3-27b-it:free',                      // 27B — fast
+    'meta-llama/llama-3.3-70b-instruct:free',          // 70B — medium
+    'deepseek/deepseek-r1-0528:free',                  // fallback
 ]
 
 /**
@@ -30,10 +30,20 @@ export async function callOpenRouter(messages, mode = 'text') {
 
     for (const model of models) {
         try {
-            const result = await _callModel(apiKey, model, messages, mode)
-            return result
+            // 25-second timeout per model — if it's queued/slow, skip to next
+            const controller = new AbortController()
+            const timeout = setTimeout(() => controller.abort(), 25000)
+            try {
+                const result = await _callModel(apiKey, model, messages, mode, controller.signal)
+                clearTimeout(timeout)
+                return result
+            } catch (err) {
+                clearTimeout(timeout)
+                throw err
+            }
         } catch (err) {
-            console.warn(`Model ${model} failed: ${err.message}. Trying next...`)
+            const reason = err.name === 'AbortError' ? 'timeout (25s)' : err.message
+            console.warn(`Model ${model} failed: ${reason}. Trying next...`)
             lastError = err
         }
     }
@@ -41,7 +51,7 @@ export async function callOpenRouter(messages, mode = 'text') {
     throw lastError || new Error('All models failed')
 }
 
-async function _callModel(apiKey, model, messages, mode) {
+async function _callModel(apiKey, model, messages, mode, signal) {
     const body = {
         model,
         messages,
@@ -61,7 +71,8 @@ async function _callModel(apiKey, model, messages, mode) {
             'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:5173',
             'X-Title': 'MedVision AI'
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        signal
     })
 
     if (!response.ok) {
