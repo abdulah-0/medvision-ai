@@ -24,7 +24,13 @@ app.use('/api/image', imageRouter)
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'MedVision AI Server is running' })
+    const hasKey = !!process.env.OPENROUTER_API_KEY
+    res.json({
+        status: 'ok',
+        message: 'MedVision AI Server is running',
+        openrouter_key: hasKey ? 'configured' : 'MISSING',
+        node_version: process.version
+    })
 })
 
 // Error handler
