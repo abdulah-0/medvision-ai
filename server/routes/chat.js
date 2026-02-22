@@ -69,7 +69,7 @@ IMPORTANT RULES:
             { role: 'user', content: trimmed }
         ]
 
-        const response = await callOpenRouter(messages, 'text')
+        const response = await callOpenRouter(messages)
         res.json({ message: response })
     } catch (error) {
         console.error('Chat route error:', error?.message || error)
