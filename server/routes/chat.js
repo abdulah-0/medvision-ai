@@ -72,7 +72,11 @@ IMPORTANT RULES:
         const response = await callOpenRouter(messages, 'text')
         res.json({ message: response })
     } catch (error) {
-        console.error('Chat error:', error)
-        res.status(500).json({ error: 'AI service temporarily unavailable. Please try again.' })
+        console.error('Chat route error:', error?.message || error)
+        const isDev = process.env.NODE_ENV !== 'production'
+        res.status(500).json({
+            error: 'AI service temporarily unavailable. Please try again.',
+            ...(isDev && { detail: error?.message })
+        })
     }
 })
