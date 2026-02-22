@@ -6,6 +6,22 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'
 console.log('[MedVision] Backend URL:', SERVER_URL)
 
 /**
+ * Pre-warm the Render backend to avoid cold-start delays.
+ * Called immediately when the app loads.
+ */
+export async function warmUpServer() {
+    try {
+        const start = Date.now()
+        const res = await fetch(`${SERVER_URL}/api/health`)
+        if (res.ok) {
+            console.log(`[MedVision] Server warm ✓ (${Date.now() - start}ms)`)
+        }
+    } catch {
+        // Silently fail — the server will still respond when the user chats
+    }
+}
+
+/**
  * Send a message to the AI via the Express backend
  */
 export async function sendChatMessage(message, history = [], userProfile = null) {

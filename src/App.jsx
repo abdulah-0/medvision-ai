@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { LandingPage } from './components/pages/LandingPage'
 import { AuthPage } from './components/pages/AuthPage'
 import { Dashboard } from './components/pages/Dashboard'
 import { Loader } from './components/common/Loader'
+import { warmUpServer } from './services/api'
 import './styles/globals.css'
+
+// Kick the Render backend awake the instant the app loads
+warmUpServer()
 
 // Protected Route Component
 function ProtectedRoute({ children }) {

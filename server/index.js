@@ -35,4 +35,18 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log(`🚀 MedVision AI Server running on http://localhost:${PORT}`)
+
+    // Self-ping every 10 min to prevent Render free tier from sleeping
+    const selfUrl = process.env.RENDER_EXTERNAL_URL
+    if (selfUrl) {
+        console.log(`♻️  Self-ping enabled: ${selfUrl}/api/health`)
+        setInterval(async () => {
+            try {
+                await fetch(`${selfUrl}/api/health`)
+                console.log('[keep-alive] ping ok')
+            } catch (err) {
+                console.warn('[keep-alive] ping failed:', err.message)
+            }
+        }, 10 * 60 * 1000) // 10 minutes
+    }
 })
