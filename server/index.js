@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { chatRouter } from './routes/chat.js'
+import { getSummary } from './metrics.js'
 import { imageRouter } from './routes/image.js'
 
 dotenv.config()
@@ -31,6 +32,15 @@ app.get('/api/health', (req, res) => {
         openrouter_key: hasKey ? 'configured' : 'MISSING',
         node_version: process.version
     })
+})
+
+// AI metrics endpoint for outage observability
+app.get('/api/ai/summary', (req, res) => {
+    try {
+        res.json(getSummary())
+    } catch (e) {
+        res.status(500).json({ error: 'Unable to fetch AI metrics' })
+    }
 })
 
 // Error handler

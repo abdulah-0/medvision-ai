@@ -74,16 +74,23 @@ IMPORTANT RULES:
     } catch (error) {
         console.error('Chat route error:', error?.message || error)
         const isDev = process.env.NODE_ENV !== 'production'
-        // Graceful degradation: if the error indicates OpenRouter is unavailable,
-        // return 503 instead of 500 to signal a temporary outage to clients.
+        // Tailored outage messaging with actionable hints and logging
+        const errorMsg = error?.message ?? ''
+        const isOutage = typeof errorMsg === 'string' && (
+            errorMsg.includes('All models failed') ||
+            errorMsg.includes('OPENROUTER_API_KEY') ||
+            errorMsg.toLowerCase().includes('openrouter')
+        )
         const msg = 'AI service temporarily unavailable. Please try again.'
-        const status = (typeof error?.message === 'string' && (
-            error.message.includes('OPENROUTER_API_KEY') ||
-            error.message.includes('All models failed')
-        )) ? 503 : 500
-        res.status(status).json({
-            error: msg,
-            ...(isDev && { detail: error?.message })
-        })
+        const status = isOutage ? 503 : 500
+        const body = { error: msg }
+        if (isOutage) {
+            body.retry_after = 60 // seconds
+            body.note = 'Upstream AI provider is experiencing issues. We are retrying in the background.'
+        }
+        if (isDev) {
+            body.detail = errorMsg
+        }
+        res.status(status).json(body)
     }
 })

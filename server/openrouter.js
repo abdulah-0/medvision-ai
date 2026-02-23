@@ -1,3 +1,4 @@
+import { recordModelAttempt, getSummary } from './metrics.js'
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 // Free models — ordered fastest to slowest
@@ -64,6 +65,7 @@ export async function callOpenRouter(messages) {
 }
 
 async function _callModel(apiKey, model, messages) {
+    const t0 = Date.now()
     // Implement a small retry/backoff to improve resilience against transient upstream failures
     const maxRetries = 2
     let lastError
@@ -84,6 +86,7 @@ async function _callModel(apiKey, model, messages) {
             })
         })
         // Basic retry/backoff handling
+        const durationMs = Date.now() - t0
         if (!response.ok) {
             const errText = await response.text()
             lastError = new Error(`HTTP ${response.status}: ${errText.slice(0, 300)}`)
@@ -93,6 +96,7 @@ async function _callModel(apiKey, model, messages) {
                 await new Promise(r => setTimeout(r, delay))
                 continue
             } else {
+                recordModelAttempt(model, false, durationMs, response.status, lastError.message)
                 throw lastError
             }
         }
@@ -106,6 +110,7 @@ async function _callModel(apiKey, model, messages) {
                 await new Promise(r => setTimeout(r, delay))
                 continue
             } else {
+                recordModelAttempt(model, false, durationMs, response.status, lastError.message)
                 throw lastError
             }
         }
@@ -113,6 +118,8 @@ async function _callModel(apiKey, model, messages) {
         const content = data.choices?.[0]?.message?.content
         if (!content) throw new Error(`No content in response: ${JSON.stringify(data).slice(0, 200)}`)
 
+        // Success
+        recordModelAttempt(model, true, durationMs, response.status, null)
         return content
     }
     // If we exit the loop, throw the last error captured
