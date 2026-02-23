@@ -64,35 +64,57 @@ export async function callOpenRouter(messages) {
 }
 
 async function _callModel(apiKey, model, messages) {
-    const response = await fetch(OPENROUTER_API_URL, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:5173',
-            'X-Title': 'MedVision AI'
-        },
-        body: JSON.stringify({
-            model,
-            messages,
-            temperature: 0.7,
-            max_tokens: 1024,
+    // Implement a small retry/backoff to improve resilience against transient upstream failures
+    const maxRetries = 2
+    let lastError
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        const response = await fetch(OPENROUTER_API_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:5173',
+                'X-Title': 'MedVision AI'
+            },
+            body: JSON.stringify({
+                model,
+                messages,
+                temperature: 0.7,
+                max_tokens: 1024,
+            })
         })
-    })
+        // Basic retry/backoff handling
+        if (!response.ok) {
+            const errText = await response.text()
+            lastError = new Error(`HTTP ${response.status}: ${errText.slice(0, 300)}`)
+            // Retry on common transient statuses
+            if ([429, 500, 502, 503].includes(response.status) && attempt < maxRetries) {
+                const delay = 200 * Math.pow(2, attempt)
+                await new Promise(r => setTimeout(r, delay))
+                continue
+            } else {
+                throw lastError
+            }
+        }
 
-    if (!response.ok) {
-        const errText = await response.text()
-        throw new Error(`HTTP ${response.status}: ${errText.slice(0, 300)}`)
+        const data = await response.json()
+
+        if (data.error) {
+            lastError = new Error(`API error: ${data.error.message || JSON.stringify(data.error)}`)
+            if (attempt < maxRetries) {
+                const delay = 200 * Math.pow(2, attempt)
+                await new Promise(r => setTimeout(r, delay))
+                continue
+            } else {
+                throw lastError
+            }
+        }
+
+        const content = data.choices?.[0]?.message?.content
+        if (!content) throw new Error(`No content in response: ${JSON.stringify(data).slice(0, 200)}`)
+
+        return content
     }
-
-    const data = await response.json()
-
-    if (data.error) {
-        throw new Error(`API error: ${data.error.message || JSON.stringify(data.error)}`)
-    }
-
-    const content = data.choices?.[0]?.message?.content
-    if (!content) throw new Error(`No content in response: ${JSON.stringify(data).slice(0, 200)}`)
-
-    return content
+    // If we exit the loop, throw the last error captured
+    throw lastError || new Error('Unknown error calling OpenRouter')
 }
