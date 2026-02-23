@@ -74,8 +74,15 @@ IMPORTANT RULES:
     } catch (error) {
         console.error('Chat route error:', error?.message || error)
         const isDev = process.env.NODE_ENV !== 'production'
-        res.status(500).json({
-            error: 'AI service temporarily unavailable. Please try again.',
+        // Graceful degradation: if the error indicates OpenRouter is unavailable,
+        // return 503 instead of 500 to signal a temporary outage to clients.
+        const msg = 'AI service temporarily unavailable. Please try again.'
+        const status = (typeof error?.message === 'string' && (
+            error.message.includes('OPENROUTER_API_KEY') ||
+            error.message.includes('All models failed')
+        )) ? 503 : 500
+        res.status(status).json({
+            error: msg,
             ...(isDev && { detail: error?.message })
         })
     }
