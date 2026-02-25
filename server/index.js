@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import rateLimit from 'express-rate-limit'
 import { chatRouter } from './routes/chat.js'
 import { imageRouter } from './routes/image.js'
 
@@ -9,20 +10,25 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// Allow all origins — safe because API keys are server-side only
-// Vercel generates unique preview URLs that can't be statically whitelisted
-app.use(cors({
-    origin: true,
-    credentials: true
-}))
-
+// Allow all origins — API keys are server-side only
+app.use(cors({ origin: true, credentials: true }))
 app.use(express.json())
 
+// Rate limiter: max 8 chat requests per minute per IP
+// Protects against OpenRouter rate limits and abuse
+const chatLimiter = rateLimit({
+    windowMs: 60 * 1000,  // 1 minute window
+    max: 8,               // 8 requests per window
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many messages. Please wait a moment before sending another.' }
+})
+
 // Routes
-app.use('/api/chat', chatRouter)
+app.use('/api/chat', chatLimiter, chatRouter)
 app.use('/api/image', imageRouter)
 
-// Health check
+// Health check — shows API key and Node version for debugging
 app.get('/api/health', (req, res) => {
     const hasKey = !!process.env.OPENROUTER_API_KEY
     res.json({
@@ -33,14 +39,15 @@ app.get('/api/health', (req, res) => {
     })
 })
 
-// Error handler
+// Global error handler
 app.use((err, req, res, next) => {
     console.error(err.stack)
     res.status(500).json({ error: 'Internal server error' })
 })
 
 app.listen(PORT, () => {
-    console.log(`🚀 MedVision AI Server running on http://localhost:${PORT}`)
+    console.log(`🚀 MedVision AI Server running on port ${PORT}`)
+    console.log(`🔑 OpenRouter key: ${process.env.OPENROUTER_API_KEY ? 'configured' : 'MISSING'}`)
 
     // Self-ping every 10 min to prevent Render free tier from sleeping
     const selfUrl = process.env.RENDER_EXTERNAL_URL
@@ -53,6 +60,6 @@ app.listen(PORT, () => {
             } catch (err) {
                 console.warn('[keep-alive] ping failed:', err.message)
             }
-        }, 10 * 60 * 1000) // 10 minutes
+        }, 10 * 60 * 1000)
     }
 })
