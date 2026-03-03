@@ -9,11 +9,29 @@ const WELCOME_MSG = {
     content: 'Welcome to MedVision AI 👋 How are you feeling today?'
 }
 
+const MAX_LENGTH = 1000
+const MIN_LENGTH = 3
+const RATE_LIMIT_MS = 3000
+
+function validateInput(message, lastSent, lastSentAt) {
+    const trimmed = message.trim()
+    if (trimmed.length < MIN_LENGTH)
+        return `Message must be at least ${MIN_LENGTH} characters.`
+    if (!/[a-zA-Z0-9]/.test(trimmed))
+        return 'Please enter a meaningful message (letters or numbers required).'
+    if (trimmed === lastSent)
+        return 'You already sent that. Please ask something different.'
+    if (lastSentAt && Date.now() - lastSentAt < RATE_LIMIT_MS) {
+        const wait = Math.ceil((RATE_LIMIT_MS - (Date.now() - lastSentAt)) / 1000)
+        return `Please wait ${wait}s before sending again.`
+    }
+    return null
+}
+
 function friendlyError(err) {
     const msg = err?.message || ''
-    if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-        return 'Network error: could not reach the AI service. Please check your connection.'
-    }
+    if (msg.includes('Failed to fetch') || msg.includes('NetworkError'))
+        return 'Network error — please check your connection.'
     return 'Something went wrong. Please try again.'
 }
 
@@ -22,33 +40,50 @@ export function FloatingChatbox() {
     const [messages, setMessages] = useState([WELCOME_MSG])
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null)
+    const [aiError, setAiError] = useState(null)
+    const [validationError, setValidationError] = useState(null)
+    const [lastSent, setLastSent] = useState('')
+    const [lastSentAt, setLastSentAt] = useState(null)
     const messagesEndRef = useRef(null)
     const inputRef = useRef(null)
     const historyRef = useRef([])
+    const validationTimerRef = useRef(null)
 
-    // Scroll to bottom whenever messages change
     useEffect(() => {
         if (open && messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
         }
     }, [messages, open])
 
-    // Focus input when opened
     useEffect(() => {
         if (open && inputRef.current) {
             setTimeout(() => inputRef.current?.focus(), 350)
         }
     }, [open])
 
+    // Clear validation on input change
+    useEffect(() => {
+        if (validationError) setValidationError(null)
+    }, [input])
+
+    useEffect(() => () => clearTimeout(validationTimerRef.current), [])
+
+    const showValidationError = useCallback((msg) => {
+        setValidationError(msg)
+        clearTimeout(validationTimerRef.current)
+        validationTimerRef.current = setTimeout(() => setValidationError(null), 4000)
+    }, [])
+
     const sendMessage = useCallback(async (content) => {
-        if (!content.trim() || loading) return
+        if (loading) return
 
         setLoading(true)
-        setError(null)
+        setAiError(null)
 
         const userMsg = { id: `u-${Date.now()}`, role: 'user', content }
         setMessages(prev => [...prev, userMsg])
+        setLastSent(content)
+        setLastSentAt(Date.now())
 
         try {
             const result = await sendChatMessage(content, historyRef.current, null)
@@ -60,7 +95,7 @@ export function FloatingChatbox() {
             ]
             setMessages(prev => [...prev, aiMsg])
         } catch (err) {
-            setError(friendlyError(err))
+            setAiError(friendlyError(err))
         } finally {
             setLoading(false)
         }
@@ -68,11 +103,18 @@ export function FloatingChatbox() {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        const trimmed = input.trim()
-        if (trimmed) {
-            setInput('')
-            sendMessage(trimmed)
+        const validationErr = validateInput(input, lastSent, lastSentAt)
+        if (validationErr) {
+            showValidationError(validationErr)
+            inputRef.current?.focus()
+            return
         }
+        const trimmed = input.trim()
+        setInput('')
+        if (inputRef.current) {
+            inputRef.current.style.height = 'auto'
+        }
+        sendMessage(trimmed)
     }
 
     const handleKeyDown = (e) => {
@@ -82,12 +124,16 @@ export function FloatingChatbox() {
         }
     }
 
-    // Auto-resize textarea
     const handleInputChange = (e) => {
+        // Enforce max length
+        if (e.target.value.length > MAX_LENGTH) return
         setInput(e.target.value)
         e.target.style.height = 'auto'
         e.target.style.height = Math.min(e.target.scrollHeight, 100) + 'px'
     }
+
+    const remaining = MAX_LENGTH - input.length
+    const isNearLimit = remaining < 150
 
     const widget = (
         <div className="fcb-root">
@@ -110,25 +156,16 @@ export function FloatingChatbox() {
                             </div>
                         </div>
                     </div>
-                    <button
-                        className="fcb-close-btn"
-                        onClick={() => setOpen(false)}
-                        aria-label="Close chat"
-                    >
+                    <button className="fcb-close-btn" onClick={() => setOpen(false)} aria-label="Close chat">
                         ✕
                     </button>
                 </div>
 
-                {/* Messages list */}
+                {/* Messages */}
                 <div className="fcb-messages">
                     {messages.map(msg => (
-                        <div
-                            key={msg.id}
-                            className={`fcb-bubble ${msg.role === 'user' ? 'fcb-bubble--user' : 'fcb-bubble--ai'}`}
-                        >
-                            {msg.role === 'assistant' && (
-                                <span className="fcb-bubble-icon">⚕️</span>
-                            )}
+                        <div key={msg.id} className={`fcb-bubble ${msg.role === 'user' ? 'fcb-bubble--user' : 'fcb-bubble--ai'}`}>
+                            {msg.role === 'assistant' && <span className="fcb-bubble-icon">⚕️</span>}
                             <span className="fcb-bubble-text">{msg.content}</span>
                         </div>
                     ))}
@@ -136,21 +173,23 @@ export function FloatingChatbox() {
                     {loading && (
                         <div className="fcb-bubble fcb-bubble--ai">
                             <span className="fcb-bubble-icon">⚕️</span>
-                            <span className="fcb-typing">
-                                <span /><span /><span />
-                            </span>
+                            <span className="fcb-typing"><span /><span /><span /></span>
                         </div>
                     )}
 
-                    {error && (
-                        <div className="fcb-error">⚠️ {error}</div>
-                    )}
-
+                    {aiError && <div className="fcb-ai-error">⚠️ {aiError}</div>}
                     <div ref={messagesEndRef} />
                 </div>
 
+                {/* Validation error */}
+                {validationError && (
+                    <div className="fcb-validation-error" role="alert">
+                        ⚠️ {validationError}
+                    </div>
+                )}
+
                 {/* Input */}
-                <form className="fcb-input-area" onSubmit={handleSubmit}>
+                <form className={`fcb-input-area ${validationError ? 'fcb-input-area--error' : ''}`} onSubmit={handleSubmit}>
                     <textarea
                         ref={inputRef}
                         className="fcb-input"
@@ -160,6 +199,7 @@ export function FloatingChatbox() {
                         placeholder="Type your message…"
                         rows={1}
                         disabled={loading}
+                        aria-invalid={!!validationError}
                     />
                     <button
                         type="submit"
@@ -170,6 +210,16 @@ export function FloatingChatbox() {
                         ➤
                     </button>
                 </form>
+
+                {/* Char counter & hint */}
+                <div className="fcb-input-footer">
+                    <span className="fcb-input-hint">Enter ↵ send · Shift+Enter new line</span>
+                    {isNearLimit && (
+                        <span className={`fcb-char-counter ${remaining < 50 ? 'fcb-char-counter--warning' : ''}`}>
+                            {remaining} left
+                        </span>
+                    )}
+                </div>
             </div>
 
             {/* Toggle FAB */}
@@ -185,6 +235,5 @@ export function FloatingChatbox() {
         </div>
     )
 
-    // Portal renders outside any parent tree — bypasses all CSS transforms/overflow
     return createPortal(widget, document.body)
 }

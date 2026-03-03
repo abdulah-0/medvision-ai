@@ -116,6 +116,53 @@
     font-weight: 600;
 }
 
+.char-counter-error {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+/* Validation error banner */
+.chat-validation-error {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 10px;
+    color: #ef4444;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: validation-slide-in 0.2s ease;
+}
+
+@keyframes validation-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-validation-icon {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+
+/* Error border state */
+.chat-input-wrapper--error {
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08) !important;
+}
+
 @media (max-width: 768px) {
     .chat-input-container {
         padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
