@@ -76,27 +76,7 @@ export function LandingPage({ onGetStarted }) {
                     </div>
                 </div>
 
-                {/* Floating chat preview card */}
-                <div className="lp-chat-preview">
-                    <div className="lp-chat-card">
-                        <div className="lp-chat-header-row">
-                            <div className="lp-chat-avatar">⚕️</div>
-                            <div>
-                                <div className="lp-chat-name">MedVision AI</div>
-                                <div className="lp-chat-online"><span className="lp-online-dot" />Online</div>
-                            </div>
-                        </div>
-                        <div className="lp-chat-bubble lp-bubble-ai">
-                            What symptoms are you experiencing today? I can help you understand what they might mean.
-                        </div>
-                        <div className="lp-chat-bubble lp-bubble-user">
-                            I have a persistent headache for 3 days along with mild fever…
-                        </div>
-                        <div className="lp-chat-bubble lp-bubble-ai lp-typing">
-                            <span /><span /><span />
-                        </div>
-                    </div>
-                </div>
+
             </section>
 
             {/* ── Features ── */}
