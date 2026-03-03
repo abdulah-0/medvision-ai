@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import './LandingPage.css'
+import { FloatingChatbox } from '../common/FloatingChatbox'
 
 export function LandingPage({ onGetStarted }) {
     const navigate = useNavigate()
@@ -232,6 +233,7 @@ export function LandingPage({ onGetStarted }) {
                     </div>
                 </div>
             </footer>
+            <FloatingChatbox />
         </div>
     )
 }
