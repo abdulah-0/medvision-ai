@@ -1,28 +1,33 @@
-/* ── Root ─────────────────────────────────────────── */
+/* ── Root — Portal-rendered, always at body level ─── */
 .fcb-root {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 9999;
+    bottom: 28px;
+    right: 28px;
+    z-index: 2147483647;
+    /* max z-index, above everything */
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 14px;
+    pointer-events: none;
+    /* children opt-in */
 }
 
 /* ── Floating Action Button ───────────────────────── */
 .fcb-fab {
+    pointer-events: auto;
     position: relative;
-    width: 60px;
-    height: 60px;
+    width: 62px;
+    height: 62px;
     border-radius: 50%;
     border: none;
     cursor: pointer;
-    font-size: 1.5rem;
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    background: linear-gradient(135deg, #6324eb, #a855f7);
     color: #fff;
-    box-shadow: 0 8px 28px rgba(99, 102, 241, 0.55);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    box-shadow: 0 8px 28px rgba(99, 36, 235, 0.55), 0 2px 8px rgba(0, 0, 0, 0.25);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.25s ease,
+        background 0.25s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -31,51 +36,68 @@
 
 .fcb-fab:hover {
     transform: scale(1.1);
-    box-shadow: 0 12px 36px rgba(99, 102, 241, 0.7);
+    box-shadow: 0 12px 36px rgba(99, 36, 235, 0.7);
 }
 
 .fcb-fab--active {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, #4f1eb0, #7c3aed);
 }
 
-/* Pulse ring animation on the FAB */
+.fcb-fab-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    display: block;
+    user-select: none;
+}
+
+/* Pulse ring */
 .fcb-fab-pulse {
     position: absolute;
-    inset: -4px;
+    inset: -5px;
     border-radius: 50%;
-    border: 2px solid rgba(99, 102, 241, 0.55);
-    animation: fcb-pulse 2s ease-out infinite;
+    border: 2px solid rgba(99, 36, 235, 0.5);
+    animation: fcb-pulse 2.2s ease-out infinite;
     pointer-events: none;
 }
 
 @keyframes fcb-pulse {
-    0%   { transform: scale(1);   opacity: 0.8; }
-    70%  { transform: scale(1.4); opacity: 0; }
-    100% { transform: scale(1.4); opacity: 0; }
+    0% {
+        transform: scale(1);
+        opacity: 0.85;
+    }
+
+    70% {
+        transform: scale(1.45);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1.45);
+        opacity: 0;
+    }
 }
 
 /* ── Chat Panel ───────────────────────────────────── */
 .fcb-panel {
-    width: 360px;
-    max-width: calc(100vw - 48px);
-    height: 520px;
-    max-height: calc(100vh - 120px);
+    pointer-events: auto;
+    width: 370px;
+    max-width: calc(100vw - 56px);
+    height: 530px;
+    max-height: calc(100vh - 130px);
     border-radius: 20px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: rgba(10, 12, 24, 0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(99, 102, 241, 0.25);
+    background: #0d0f1e;
+    border: 1px solid rgba(99, 36, 235, 0.3);
     box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.55),
+        0 32px 72px rgba(0, 0, 0, 0.65),
         0 0 0 1px rgba(255, 255, 255, 0.04),
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
     /* Hidden state */
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(16px) scale(0.96);
     pointer-events: none;
     transition:
         opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -96,7 +118,7 @@
     justify-content: space-between;
     padding: 14px 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.12));
+    background: linear-gradient(135deg, rgba(99, 36, 235, 0.2), rgba(168, 85, 247, 0.12));
     flex-shrink: 0;
 }
 
@@ -107,20 +129,20 @@
 }
 
 .fcb-avatar {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    background: linear-gradient(135deg, #6324eb, #a855f7);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    font-size: 1.15rem;
+    box-shadow: 0 4px 14px rgba(99, 36, 235, 0.45);
     flex-shrink: 0;
 }
 
 .fcb-name {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     font-weight: 700;
     color: #f1f5f9;
     letter-spacing: 0.01em;
@@ -132,7 +154,7 @@
     gap: 5px;
     font-size: 0.72rem;
     color: #94a3b8;
-    margin-top: 1px;
+    margin-top: 2px;
 }
 
 .fcb-online-dot {
@@ -140,23 +162,30 @@
     height: 7px;
     border-radius: 50%;
     background: #22c55e;
-    box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
     animation: fcb-blink 2.5s ease-in-out infinite;
 }
 
 @keyframes fcb-blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.4; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
 }
 
 .fcb-close-btn {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     color: #94a3b8;
     cursor: pointer;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -165,7 +194,7 @@
 }
 
 .fcb-close-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.14);
     color: #f1f5f9;
 }
 
@@ -178,6 +207,7 @@
     flex-direction: column;
     gap: 10px;
     scroll-behavior: smooth;
+    background: #0d0f1e;
 }
 
 .fcb-messages::-webkit-scrollbar {
@@ -189,7 +219,7 @@
 }
 
 .fcb-messages::-webkit-scrollbar-thumb {
-    background: rgba(99, 102, 241, 0.3);
+    background: rgba(99, 36, 235, 0.35);
     border-radius: 2px;
 }
 
@@ -198,13 +228,20 @@
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    max-width: 88%;
-    animation: fcb-pop 0.25s ease;
+    max-width: 90%;
+    animation: fcb-pop 0.22s ease;
 }
 
 @keyframes fcb-pop {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .fcb-bubble--ai {
@@ -219,7 +256,7 @@
 .fcb-bubble-icon {
     font-size: 1rem;
     flex-shrink: 0;
-    margin-top: 2px;
+    margin-top: 3px;
 }
 
 .fcb-bubble--user .fcb-bubble-icon {
@@ -230,23 +267,24 @@
     padding: 10px 14px;
     border-radius: 14px;
     font-size: 0.855rem;
-    line-height: 1.55;
+    line-height: 1.6;
     white-space: pre-wrap;
     word-break: break-word;
+    font-family: 'Manrope', 'Inter', sans-serif;
 }
 
 .fcb-bubble--ai .fcb-bubble-text {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     color: #e2e8f0;
     border-radius: 4px 14px 14px 14px;
 }
 
 .fcb-bubble--user .fcb-bubble-text {
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    background: linear-gradient(135deg, #6324eb, #7c3aed);
     color: #fff;
     border-radius: 14px 4px 14px 14px;
-    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    box-shadow: 0 4px 14px rgba(99, 36, 235, 0.38);
 }
 
 /* ── Typing indicator ─────────────────────────────── */
@@ -255,8 +293,8 @@
     align-items: center;
     gap: 4px;
     padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 4px 14px 14px 14px;
 }
 
@@ -264,16 +302,31 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #6366f1;
+    background: #a855f7;
     animation: fcb-dot 1.3s ease-in-out infinite;
 }
 
-.fcb-typing span:nth-child(2) { animation-delay: 0.18s; }
-.fcb-typing span:nth-child(3) { animation-delay: 0.36s; }
+.fcb-typing span:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+.fcb-typing span:nth-child(3) {
+    animation-delay: 0.36s;
+}
 
 @keyframes fcb-dot {
-    0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
-    40%            { transform: scale(1.1); opacity: 1; }
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.7);
+        opacity: 0.45;
+    }
+
+    40% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
 }
 
 /* ── Error ────────────────────────────────────────── */
@@ -281,11 +334,12 @@
     font-size: 0.78rem;
     color: #f87171;
     background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.22);
     border-radius: 10px;
     padding: 8px 12px;
     align-self: center;
     text-align: center;
+    width: 100%;
 }
 
 /* ── Input area ───────────────────────────────────── */
@@ -295,14 +349,14 @@
     gap: 8px;
     padding: 12px 14px;
     border-top: 1px solid rgba(255, 255, 255, 0.07);
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(13, 15, 30, 0.95);
     flex-shrink: 0;
 }
 
 .fcb-input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(99, 36, 235, 0.25);
     border-radius: 12px;
     color: #f1f5f9;
     font-size: 0.855rem;
@@ -310,19 +364,19 @@
     padding: 9px 12px;
     resize: none;
     outline: none;
-    font-family: inherit;
+    font-family: 'Manrope', 'Inter', sans-serif;
     max-height: 100px;
     overflow-y: auto;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .fcb-input:focus {
-    border-color: rgba(99, 102, 241, 0.55);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 36, 235, 0.6);
+    box-shadow: 0 0 0 3px rgba(99, 36, 235, 0.14);
 }
 
 .fcb-input::placeholder {
-    color: #475569;
+    color: #3d4460;
 }
 
 .fcb-input::-webkit-scrollbar {
@@ -330,34 +384,34 @@
 }
 
 .fcb-input::-webkit-scrollbar-thumb {
-    background: rgba(99, 102, 241, 0.3);
+    background: rgba(99, 36, 235, 0.3);
     border-radius: 2px;
 }
 
 .fcb-send-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
     border: none;
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    background: linear-gradient(135deg, #6324eb, #a855f7);
     color: #fff;
-    font-size: 1rem;
+    font-size: 1.05rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 14px rgba(99, 36, 235, 0.45);
 }
 
 .fcb-send-btn:hover:not(:disabled) {
     transform: scale(1.08);
-    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.55);
+    box-shadow: 0 6px 20px rgba(99, 36, 235, 0.6);
 }
 
 .fcb-send-btn:disabled {
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: not-allowed;
     box-shadow: none;
 }
@@ -371,6 +425,6 @@
 
     .fcb-panel {
         width: calc(100vw - 32px);
-        height: 72vh;
+        height: 75vh;
     }
 }

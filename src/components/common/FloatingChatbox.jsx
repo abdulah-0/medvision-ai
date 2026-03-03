@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { sendChatMessage } from '../../services/api'
 import './FloatingChatbox.css'
 
@@ -36,7 +37,7 @@ export function FloatingChatbox() {
     // Focus input when opened
     useEffect(() => {
         if (open && inputRef.current) {
-            inputRef.current.focus()
+            setTimeout(() => inputRef.current?.focus(), 350)
         }
     }, [open])
 
@@ -46,20 +47,12 @@ export function FloatingChatbox() {
         setLoading(true)
         setError(null)
 
-        const userMsg = {
-            id: `u-${Date.now()}`,
-            role: 'user',
-            content
-        }
+        const userMsg = { id: `u-${Date.now()}`, role: 'user', content }
         setMessages(prev => [...prev, userMsg])
 
         try {
             const result = await sendChatMessage(content, historyRef.current, null)
-            const aiMsg = {
-                id: `a-${Date.now()}`,
-                role: 'assistant',
-                content: result.message
-            }
+            const aiMsg = { id: `a-${Date.now()}`, role: 'assistant', content: result.message }
             historyRef.current = [
                 ...historyRef.current,
                 { role: 'user', content },
@@ -89,30 +82,53 @@ export function FloatingChatbox() {
         }
     }
 
-    return (
+    // Auto-resize textarea
+    const handleInputChange = (e) => {
+        setInput(e.target.value)
+        e.target.style.height = 'auto'
+        e.target.style.height = Math.min(e.target.scrollHeight, 100) + 'px'
+    }
+
+    const widget = (
         <div className="fcb-root">
             {/* Chat panel */}
-            <div className={`fcb-panel ${open ? 'fcb-panel--open' : ''}`} role="dialog" aria-label="MedVision AI Chat">
+            <div
+                className={`fcb-panel ${open ? 'fcb-panel--open' : ''}`}
+                role="dialog"
+                aria-label="MedVision AI Chat"
+                aria-hidden={!open}
+            >
                 {/* Header */}
                 <div className="fcb-header">
                     <div className="fcb-header-info">
                         <div className="fcb-avatar">⚕️</div>
                         <div>
                             <div className="fcb-name">MedVision AI</div>
-                            <div className="fcb-status"><span className="fcb-online-dot" />Online 24/7</div>
+                            <div className="fcb-status">
+                                <span className="fcb-online-dot" />
+                                Online 24/7
+                            </div>
                         </div>
                     </div>
-                    <button className="fcb-close-btn" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
+                    <button
+                        className="fcb-close-btn"
+                        onClick={() => setOpen(false)}
+                        aria-label="Close chat"
+                    >
+                        ✕
+                    </button>
                 </div>
 
-                {/* Messages */}
+                {/* Messages list */}
                 <div className="fcb-messages">
                     {messages.map(msg => (
                         <div
                             key={msg.id}
                             className={`fcb-bubble ${msg.role === 'user' ? 'fcb-bubble--user' : 'fcb-bubble--ai'}`}
                         >
-                            {msg.role === 'assistant' && <span className="fcb-bubble-icon">⚕️</span>}
+                            {msg.role === 'assistant' && (
+                                <span className="fcb-bubble-icon">⚕️</span>
+                            )}
                             <span className="fcb-bubble-text">{msg.content}</span>
                         </div>
                     ))}
@@ -139,7 +155,7 @@ export function FloatingChatbox() {
                         ref={inputRef}
                         className="fcb-input"
                         value={input}
-                        onChange={e => setInput(e.target.value)}
+                        onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Type your message…"
                         rows={1}
@@ -149,22 +165,26 @@ export function FloatingChatbox() {
                         type="submit"
                         className="fcb-send-btn"
                         disabled={loading || !input.trim()}
-                        aria-label="Send"
+                        aria-label="Send message"
                     >
                         ➤
                     </button>
                 </form>
             </div>
 
-            {/* Toggle button */}
+            {/* Toggle FAB */}
             <button
                 className={`fcb-fab ${open ? 'fcb-fab--active' : ''}`}
                 onClick={() => setOpen(prev => !prev)}
-                aria-label={open ? 'Close chat' : 'Open chat with MedVision AI'}
+                aria-label={open ? 'Close chat' : 'Chat with MedVision AI'}
+                title="Chat with MedVision AI"
             >
-                {open ? '✕' : '💬'}
+                <span className="fcb-fab-icon">{open ? '✕' : '💬'}</span>
                 {!open && <span className="fcb-fab-pulse" />}
             </button>
         </div>
     )
+
+    // Portal renders outside any parent tree — bypasses all CSS transforms/overflow
+    return createPortal(widget, document.body)
 }
