@@ -10,6 +10,10 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Trust Render's reverse proxy so express-rate-limit reads the real client IP
+// from X-Forwarded-For — without this it throws ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
+app.set('trust proxy', 1)
+
 // Allow all origins — API keys are server-side only
 app.use(cors({ origin: true, credentials: true }))
 app.use(express.json())

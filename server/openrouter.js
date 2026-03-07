@@ -8,11 +8,12 @@ const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
  * https://openrouter.ai/settings/privacy
  */
 const FREE_TEXT_MODELS = [
-    'deepseek/deepseek-r1-0528:free',             // DeepSeek provider — reliable
-    'nvidia/llama-3.1-nemotron-70b-instruct:free', // NVIDIA provider
-    'meta-llama/llama-3.3-70b-instruct:free',      // Meta via various providers
-    'openai/gpt-oss-120b:free',                    // OpenAI (needs privacy setting)
-    'google/gemma-3-27b-it:free',                  // Google provider
+    'meta-llama/llama-3.3-70b-instruct:free',   // Meta — reliable, fast
+    'mistralai/mistral-7b-instruct:free',         // Mistral — very stable
+    'qwen/qwen2.5-72b-instruct:free',             // Alibaba Qwen — strong fallback
+    'microsoft/phi-4:free',                        // Microsoft Phi-4
+    'deepseek/deepseek-r1:free',                   // DeepSeek R1 (not the dead 0528 variant)
+    'google/gemma-3-27b-it:free',                  // Google Gemma 3
 ]
 
 /**
