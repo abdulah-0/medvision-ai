@@ -85,7 +85,7 @@ async function _callModel(apiKey, model, messages) {
             model,
             messages,
             temperature: 0.7,
-            max_tokens: 512,
+            max_tokens: 300,
         })
     })
 
