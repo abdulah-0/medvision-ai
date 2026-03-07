@@ -8,12 +8,13 @@ const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
  * https://openrouter.ai/settings/privacy
  */
 const FREE_TEXT_MODELS = [
-    'meta-llama/llama-3.3-70b-instruct:free',   // Meta — reliable, fast
-    'mistralai/mistral-7b-instruct:free',         // Mistral — very stable
-    'qwen/qwen2.5-72b-instruct:free',             // Alibaba Qwen — strong fallback
-    'microsoft/phi-4:free',                        // Microsoft Phi-4
-    'deepseek/deepseek-r1:free',                   // DeepSeek R1 (not the dead 0528 variant)
-    'google/gemma-3-27b-it:free',                  // Google Gemma 3
+    'meta-llama/llama-3.3-70b-instruct:free',       // Meta — large, reliable
+    'google/gemma-3-27b-it:free',                    // Google Gemma 3 27B
+    'google/gemma-3-12b-it:free',                    // Google Gemma 3 12B — faster fallback
+    'mistralai/mistral-small-3.1-24b-instruct:free', // Mistral Small 3.1 — verified live
+    'nousresearch/hermes-3-llama-3.1-405b:free',    // Nous Hermes — very capable
+    'meta-llama/llama-3.2-3b-instruct:free',         // Llama 3.2 3B — small & fast
+    'openai/gpt-oss-20b:free',                       // OpenAI OSS 20B
 ]
 
 /**
